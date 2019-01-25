@@ -334,7 +334,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Libraries\inc;.\Libraries\src;.\Libraries;.\Hardware;.\User;.\Hardware\delay;.\Hardware\sys;.\Hardware\usart;.\Hardware\LED;.\Hardware\key;.\Hardware\Tim_2</IncludePath>
+              <IncludePath>.\Libraries\inc;.\Libraries\src;.\Libraries;.\Hardware;.\User;.\Hardware\delay;.\Hardware\sys;.\Hardware\usart;.\Hardware\LED;.\Hardware\key;.\Hardware\TIM2_X;.\Hardware\Tim_2</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -561,6 +561,11 @@
               <FileName>tim_2.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\Tim_2\tim_2.c</FilePath>
+            </File>
+            <File>
+              <FileName>Xaxis_setup.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\TIM2_X\Xaxis_setup.c</FilePath>
             </File>
           </Files>
         </Group>
