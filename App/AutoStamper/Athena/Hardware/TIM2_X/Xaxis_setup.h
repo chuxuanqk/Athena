@@ -10,8 +10,8 @@
 #define X_DIR_CLK                   RCC_APB2Periph_GPIOC
 #define X_DIR_PIN                   GPIO_Pin_1        // 方向控制引脚
 #define X_DIR_ENA_PORT              GPIOC
-#define X_DIR_CW()                  GPIO_SetBits(AxisDirPort, AXIS_DIR_1)
-#define X_DIR_CCW()                 GPIO_ResetBits(AxisDirPort, AXIS_DIR_1)
+#define X_DIR_CW()                  GPIO_SetBits(X_DIR_ENA_PORT,X_DIR_PIN)
+#define X_DIR_CCW()                 GPIO_ResetBits(X_DIR_ENA_PORT, X_DIR_PIN)
 
 #define X_ENA_PIN                   GPIO_Pin_0                
 
@@ -23,16 +23,13 @@
 #define X_TIM_SetCompare2           TIM_SetCompare2    //还不熟悉
 
 
-
 void X_TIM_init(void);
 uint32_t X_sqrt(uint32_t x);
 static void X_GPIO_init(void);
 static void X_NVIC_init(void);
+
 void X_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState);
 void X_MoveAbs(int32_t step, uint32_t accel, uint32_t decel, uint32_t speed);
-
-
-
 
 
 #define X_TIM_PRESCALER                      8 //实际则是 8MHz
@@ -47,7 +44,6 @@ typedef struct{
 			int32_t decel_val;//减速值
 			int32_t min_delay;
 			int32_t accel_count;                 //加速过程的脉冲数
-
 }XspeedRampData;
 
 #define FALSE   0

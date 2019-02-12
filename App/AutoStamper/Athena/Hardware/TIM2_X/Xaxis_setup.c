@@ -90,7 +90,7 @@ void X_TIM_init(void)//定时器配置
 	X_NVIC_init();
 	
 	TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
-	TIM_TimeBaseStructure.TIM_Prescaler = 8; //预分频后得到的频率是8M，介绍里面设置的是3
+	TIM_TimeBaseStructure.TIM_Prescaler = 8; //72/(8+1) = 8M,预分频后得到的频率是8M，介绍里面设置的是3
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(X_TIMx, &TIM_TimeBaseStructure);
@@ -173,7 +173,7 @@ void X_MoveAbs(int32_t step, uint32_t accel, uint32_t decel, uint32_t speed)
 	{
 		srd_x.accel_count = -1;
 		srd_x.run_state =DECEL;
-		srd_x.step_delay = 1000;
+		//srd_x.step_delay = 1000;
 		X_Status = 1;
 	}
 	else if(step != 0)//如果目标运动步数不为0
@@ -184,9 +184,9 @@ void X_MoveAbs(int32_t step, uint32_t accel, uint32_t decel, uint32_t speed)
 		//srd_x.step_delay = (int32_t)(T1_FREQ_148*X_sqrt(A_SQ*10000/accel)/100);
 		srd_x.step_delay = (int32_t)((T1_FREQ*0.676* X_sqrt(ALPHA*10000/accel)/100));
 		
-		printf("T1:%d", T1_FREQ);
+		// printf("T1:%d", T1_FREQ);
 		
-		printf("srd_x.step_delay:%d\n\r", srd_x.step_delay);
+		// printf("srd_x.step_delay:%d\n\r", srd_x.step_delay);
 		
 	  //计算多少步之后达到最大速度限制(加速的值需要除以10才是真实值)
 		max_s_lim = (uint32_t)(speed*speed/(2*ALPHA*accel));
@@ -322,7 +322,6 @@ void TIM2_IRQHandler(void)
 				if(srd_x.dir == CW)
 				{
 					X_pos++;
-				
 				}
 				else
 				{
@@ -336,7 +335,7 @@ void TIM2_IRQHandler(void)
 					srd_x.run_state = DECEL;
 				}
 				break;
-/*减速运动*/				
+			/*减速运动*/				
 			case DECEL:
 				step_count++;
 				if(srd_x.dir == CW)
@@ -361,7 +360,6 @@ void TIM2_IRQHandler(void)
 
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 	}
-
 }
 
 
