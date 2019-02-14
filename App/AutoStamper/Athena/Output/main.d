@@ -34,5 +34,5 @@
 .\output\main.o: .\Hardware\delay\delay.h
 .\output\main.o: .\Hardware\usart\usart.h
 .\output\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\output\main.o: .\Hardware\Tim_2\tim_2.h
-.\output\main.o: .\Hardware\TIM2_X\Xaxis_setup.h
+.\output\main.o: .\Hardware\TIM2\tim_2.h
+.\output\main.o: .\Hardware\Xaxis\X_Setup.h

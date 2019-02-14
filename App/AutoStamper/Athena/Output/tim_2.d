@@ -1,5 +1,5 @@
-.\output\tim_2.o: Hardware\Tim_2\tim_2.c
-.\output\tim_2.o: Hardware\Tim_2\tim_2.h
+.\output\tim_2.o: Hardware\TIM2\tim_2.c
+.\output\tim_2.o: Hardware\TIM2\tim_2.h
 .\output\tim_2.o: .\Libraries\stm32f10x.h
 .\output\tim_2.o: .\Libraries\core_cm3.h
 .\output\tim_2.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h

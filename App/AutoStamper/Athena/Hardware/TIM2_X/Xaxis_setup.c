@@ -200,7 +200,7 @@ void X_MoveAbs(int32_t step, uint32_t accel, uint32_t decel, uint32_t speed)
 		accel_lim = (uint32_t)(step*decel/(accel+decel));
 		
 		if(accel_lim == 0){
-		accel_lim =1;		
+			accel_lim =1;		
 		}
 		
 		//当加速阶段未达到最大速度就开始减速

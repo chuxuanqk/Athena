@@ -1,19 +1,20 @@
 #include "X_Setup.h"
-
+#include "usart.h"
 
 XspeedRampData srd_x; 
 int32_t X_Status = 0;           // 是否在运动？ 0：停止， 1：运动
-int32_t xpos = 0;               // 当前位置
+int32_t X_pos = 0;               // 当前位置
 
-int32_t flag = 1;
 
+float __FRE[STEP_S] = {0.0};
+uint16_t __ARR[STEP_S] = {0};
 
 double exp(double x)
 {
-    uint8_t i = 0;
+    uint16_t i = 0;
 
     x = 1.0 + x/256;
-    for(; i<6; i++)
+    for(; i<8; i++)
     {
         x = x*x;
     }
@@ -21,21 +22,48 @@ double exp(double x)
 }
 
 
-void TIM2_CH2_Init(uint16_t arr, uint16_t psc)
+void TIM2_CH2_Init(void)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);        // 使能TIM2
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);       // 使能GPIOA
 
-    TIM2_RemapConfig_Init();                    // 配置重映射
-    GPIOA_1_CH2_Init();                         // 初始化GPIOA_1
-    TIM2_NVIC_Init();                           // 初始化TIM2中断配置
-    TIM2_Init(arr, psc);                        // 初始化TIM2
-    TIM2_PWM_Init();                            // 配置TIM2的PWM模式
+    TIM2_RemapConfig_Init();                        // 配置重映射
     
-    TIM_SetAutoreload(TIM2, arr);               // 设置自动重装载值
-	TIM_SetCompare1(TIM2, arr/2);               // 设置比较值
+	DIR_ENA_Init();									// 初始化DIR_ENA
+	GPIOA_1_CH2_Init();                             // 初始化GPIOA_1
+    
+	TIM2_NVIC_Init();                               // 初始化TIM2中断配置
 
-    TIM_Cmd(TIM2, ENABLE);                      // 使能TIM2
+    TIM2_Init(0xFFFF, 8);                           // 初始化TIM2
+    TIM2_PWM_Init();                                // 配置TIM2的PWM模式
+    
+    TIM_OC2PreloadConfig(X_TIMx, TIM_OCPreload_Enable);             // 使能重装载
+    
+    TIM_ClearFlag(X_TIMx, TIM_FLAG_Update);                         // 设置FLAG更新
+
+    TIM_ITConfig(X_TIMx, TIM_IT_Update, ENABLE);                    // 使能通用定时器中断
+
+    // TIM_SetAutoreload(TIM2, arr);               // 设置自动重装载值
+	// TIM_SetCompare1(TIM2, arr/2);               // 设置比较值
+
+    // TIM_Cmd(TIM2, ENABLE);                      // 使能TIM2
+}
+
+
+void DIR_ENA_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	
+	RCC_APB2PeriphClockCmd(X_DIR_CLK ,ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = X_DIR_PIN|X_ENA_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    
+    GPIO_Init(X_DIR_PORT, &GPIO_InitStructure);
+
+	//X_DIR_RESET;
+	//X_ENA_RESET;
 }
 
 
@@ -66,19 +94,22 @@ void X_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState)
 
 void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
 {
-    uint32_t i=0;
-    float x;
-    float y;
+    int32_t i=0;
+    float x = 0.0;
+    float y = 0;
     float D_value = fre_max - fre_min;
-
+	
     for(; i<len; i++)
     {
-        x = flexible*(i-len/2)/(len/2);                 //归一化
+        x = flexible*(i-(len/2))/(len/2);                 //归一化
         y = 1.0/(1+exp(-x));
-        fre[i] = D_value*y + fre_min;
-        arr[i] = (uint16_t)((T1_FREQ/fre[i]) - 1);
+		
+		
+        __FRE[i] = D_value*y + fre_min;
+        __ARR[i] = (uint16_t)((T1_FREQ/fre[i]) -  1);
     }
-
+	
+	
     return;
 }
 
@@ -87,49 +118,176 @@ void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_ma
  * speed: 最大角速度(rad/s)
  * 800脉冲一圈
  * ******************************************************/
-void X_MoveAbs(int32_t step, uint16_t len,float fre_max, float fre_min, uint32_t speed, float flexible)
+void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
-    float fre[len] = {0};
-    float arr[len] = {0};
+    CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
 
-    CalculateSModelLine(fre, arr, len, fre_max, fre_min, 8);
-
+	//printf("T1_FREQ:%d\n",T1_FREQ);
+  
     step = step - X_pos;         // 绝对位移
-
+	
     X_ENA(TIM2, ENABLE);
 
     // 设置运动方向
     if(step < 0)
     {
+		printf("step<0\r\n");
         srd_x.dir = CCW;
-        X_DIR_RESET;
-        step = -step; 
-    } else{
+		X_DIR_RESET;
+        
+		step = -step; 
+    }else{
+		printf("step>0\r\n");
         srd_x.dir = CW;
-        X_DIR_SET;
+		X_DIR_SET;                   // step为正，ENA为+，顺时针
     }
+	printf("srd_x.dir:%d\r\n", srd_x.dir);
+	
+	srd_x.total_count = step;    // 记录要走的总步数
+	printf("Start_step:%d\r\n", step);
+	printf("Start_X_pos:%d\r\n", X_pos);
 
     // 当旋转角度很小时，直接以启动频率开始运行
     if(step == 1)
     {
         srd_x.accel_count = 1;
-        srd_x.step_delay = int16_t((T1_FREQ/fre_min) - 1);
+        srd_x.step_arr = (int16_t)((T1_FREQ/fre_min) - 1);
         srd_x.run_state = DECEL;
         X_Status = 1;
     }else if(step != 0){
-        if(step < 2*len)
+        if(step <= (STEP_S*2))
         {
-            srd_x.step_delay = arr[0];
-            srd_x.accel_count = int16_t(step/2);
+            srd_x.step_arr = __ARR[0];
+            srd_x.accel_count = (int32_t)(step/2);
+            srd_x.decel_start = srd_x.accel_count;
             srd_x.run_state = ACCEL;
             X_Status = 1;
+			
         }else{
-            srd_x.step_delay = arr[0];
-            srd_x.accel_count = len;
+            srd_x.step_arr = __ARR[0];
+            srd_x.accel_count = STEP_S;
+            srd_x.decel_start = step - STEP_S;
             srd_x.run_state = ACCEL;
             X_Status = 1;
         }
     }
+	
+	
+    X_TIM_SetAutoreload(X_TIMx, srd_x.step_arr);
+    X_TIM_SetAutoreload(X_TIMx, (srd_x.step_arr/2));
+
+    TIM_Cmd(X_TIMx, ENABLE);                    // 定时器使能
+}
+
+
+/***************************************
+ * 
+ *           TIM2中断处理函数
+ * 
+ * ************************************/
+void TIM2_IRQHandler(void)
+{
+    static uint16_t step_count = 0;                 // 总移步数计数器
+
+    if(TIM_GetITStatus(X_TIMx, TIM_IT_Update) != RESET)
+    {
+        switch(srd_x.run_state)
+        {
+            case STOP:
+				printf("\r\nSTOP_X_pos:%d\r\n\r\n", X_pos);
+                step_count = 0;
+
+                TIM_Cmd(X_TIMx, DISABLE);
+                X_ENA_RESET;
+			
+                X_Status = 0;
+
+                break;
+
+            case ACCEL:
+                step_count++;
+			
+                if(srd_x.dir==CW)
+                {
+                    X_pos++;
+                }else{
+                    X_pos--;
+                }
+
+                if(step_count < srd_x.accel_count)
+                {
+                    srd_x.step_arr = __ARR[step_count];
+                    srd_x.run_state = ACCEL;
+					
+                }else if(step_count >= srd_x.decel_start){                          // 直接进入减速阶段
+                    srd_x.step_arr = __ARR[step_count-1];
+					
+					printf("\r\nX_pos_ACCEL:%d\r\n", X_pos);
+					printf("DECEL_X_pos:%d\r\n", X_pos);
+					
+                    srd_x.run_state = DECEL;
+					
+                }else if(step_count >= STEP_S){    
+					// 进入匀速阶段
+                    srd_x.step_arr = __ARR[STEP_S-1];
+                    srd_x.run_state = RUN;
+                }
+				
+                break;
+
+            case RUN:
+                step_count++;
+			
+                if(srd_x.dir==CW)
+                {
+                    X_pos++;
+                }else{
+                    X_pos--;
+                }
+
+                if(step_count >= srd_x.decel_start)
+                {
+					printf("RUN->DECEL:%d\r\n", step_count);
+                    srd_x.step_arr = __ARR[STEP_S-1];
+                    srd_x.run_state = DECEL;
+                }
+                
+                break;
+
+            case DECEL:
+                step_count++;
+			
+                if(srd_x.dir==CW)
+                {
+                    X_pos++;
+                }else{
+                    X_pos--;
+                }
+                
+                if(step_count < srd_x.total_count)
+                {
+                    srd_x.step_arr = __ARR[srd_x.total_count-step_count];
+                }else{
+					printf("total_count:%d\r\n", srd_x.total_count);
+					printf("DECEL_step_count:%d\r\n", step_count);
+					printf("X_pos_DECEL:%d\r\n", X_pos);
+					
+					srd_x.run_state = STOP;
+                }
+
+                break;
+
+        }
+
+		//printf("step_arr[%d]:%d\r\n", step_count, srd_x.step_arr);
+		
+        X_TIM_SetAutoreload(X_TIMx, srd_x.step_arr);
+        X_TIM_SetCompare2(X_TIMx, (srd_x.step_arr/2));
+
+        TIM_ClearITPendingBit(X_TIMx, TIM_IT_Update);
+    }
 
 }
+
+
 

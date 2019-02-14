@@ -58,7 +58,10 @@ void TIM2_PWM_Init(void)
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
 	
-	TIM_OC1Init(TIM2, &TIM_OCInitStructure);   // 初始化TIM2的CH1为PWN输出
+	//TIM_OC1Init(TIM2, &TIM_OCInitStructure);   // 初始化TIM2的CH1为PWN输出
+	TIM_OC2Init(TIM2, &TIM_OCInitStructure);
+	//TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+	//TIM_OC4Init(TIM2, &TIM_OCInitStructure);
 }
 
 
@@ -106,7 +109,7 @@ void TIM2_Init(uint16_t arr,uint16_t psc)
  ************************************************************/
 void TIM2_CH1_Init(uint16_t arr, uint16_t psc)
 {
-    TIM_OCInitTypeDef TIM2_OCInitStructure;
+    //TIM_OCInitTypeDef TIM2_OCInitStructure;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);        // 使能TIM2
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);       // 使能GPIOA
@@ -141,7 +144,7 @@ void TIM2_CH3_CH4_Init(uint16_t arr,uint16_t psc)
     TIM2_Init(arr,psc);
 	
 	// 配置TIM2的PWM模式
-	TIM2_OCInitStructure = TIM2_PWM_Init();
+	TIM2_PWM_Init();
     // 初始化CH3和CH4
     TIM_OC3Init(TIM2, &TIM2_OCInitStructure);
 	TIM_OC4Init(TIM2, &TIM2_OCInitStructure);
