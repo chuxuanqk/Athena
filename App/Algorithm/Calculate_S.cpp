@@ -32,8 +32,8 @@ void CaluclateSModelLine(float fre[], int arr[], int len, float fre_max, float f
 		y = 1.0/(1+exp(-x));
 		fre[i] = D_value*y + fre_min;
 		arr[i] = (int)((8000000/fre[i]) - 1);
-		// printf("fre[%d]:%lf\n", i, fre[i]);
-		// printf("arr[%d]:%d\n", i, arr[i]);
+		printf("fre[%d]:%lf\n", i, fre[i]);
+		printf("arr[%d]:%d\n", i, arr[i]);
 	}
 	return;
 }
