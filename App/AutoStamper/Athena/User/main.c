@@ -47,9 +47,6 @@ int main(void)
 
 			X_MoveAbs(Xstep, 12800.0, 800.0,5.0);
 			
-			// X_MoveAbs(Xstep, set_accel, set_decel, set_speed);
-			
-			
 			USART_RX_STA=0;
 		}
 		

@@ -21,6 +21,21 @@ double exp(double x)
     return x;
 }
 
+void DIR_ENA_Init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	
+	RCC_APB2PeriphClockCmd(X_DIR_CLK ,ENABLE);
+
+    GPIO_InitStructure.GPIO_Pin = X_DIR_PIN|X_ENA_PIN;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    
+    GPIO_Init(X_DIR_PORT, &GPIO_InitStructure);
+
+	X_DIR_RESET;
+	X_ENA_RESET;
+}
 
 void TIM2_CH2_Init(void)
 {
@@ -34,7 +49,7 @@ void TIM2_CH2_Init(void)
     
 	TIM2_NVIC_Init();                               // 初始化TIM2中断配置
 
-    TIM2_Init(0xFFFF, 8);                           // 初始化TIM2
+    TIM2_Init(9999, 8);                           // 初始化TIM2
     TIM2_PWM_Init();                                // 配置TIM2的PWM模式
     
     TIM_OC2PreloadConfig(X_TIMx, TIM_OCPreload_Enable);             // 使能重装载
@@ -43,27 +58,11 @@ void TIM2_CH2_Init(void)
 
     TIM_ITConfig(X_TIMx, TIM_IT_Update, ENABLE);                    // 使能通用定时器中断
 
-    // TIM_SetAutoreload(TIM2, arr);               // 设置自动重装载值
-	// TIM_SetCompare1(TIM2, arr/2);               // 设置比较值
+    //TIM_SetAutoreload(TIM2, 19999);               // 设置自动重装载值
+	//TIM_SetCompare1(TIM2, 9999);               // 设置比较值
 
-    // TIM_Cmd(TIM2, ENABLE);                      // 使能TIM2
-}
-
-
-void DIR_ENA_Init(void)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-	
-	RCC_APB2PeriphClockCmd(X_DIR_CLK ,ENABLE);
-
-    GPIO_InitStructure.GPIO_Pin = X_DIR_PIN|X_ENA_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    
-    GPIO_Init(X_DIR_PORT, &GPIO_InitStructure);
-
-	//X_DIR_RESET;
-	//X_ENA_RESET;
+	TIM_Cmd(X_TIMx, DISABLE);
+    //TIM_Cmd(X_TIMx, ENABLE);                      // 使能TIM2
 }
 
 
@@ -141,11 +140,12 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
         srd_x.dir = CW;
 		X_DIR_SET;                   // step为正，ENA为+，顺时针
     }
-	printf("srd_x.dir:%d\r\n", srd_x.dir);
+
 	
 	srd_x.total_count = step;    // 记录要走的总步数
-	printf("Start_step:%d\r\n", step);
-	printf("Start_X_pos:%d\r\n", X_pos);
+
+//	printf("Start_step:%d\r\n", step);
+//	printf("Start_X_pos:%d\r\n", X_pos);
 
     // 当旋转角度很小时，直接以启动频率开始运行
     if(step == 1)
@@ -172,6 +172,7 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
         }
     }
 	
+	printf("Defeine_step_arr:%d\r\n", srd_x.step_arr);
 	
     X_TIM_SetAutoreload(X_TIMx, srd_x.step_arr);
     X_TIM_SetAutoreload(X_TIMx, (srd_x.step_arr/2));
@@ -194,7 +195,9 @@ void TIM2_IRQHandler(void)
         switch(srd_x.run_state)
         {
             case STOP:
-				printf("\r\nSTOP_X_pos:%d\r\n\r\n", X_pos);
+//				printf("STOP_step_arr:%d\r\n", srd_x.step_arr);
+//				printf("STOP_X_pos:%d\r\n\r\n", X_pos);
+			
                 step_count = 0;
 
                 TIM_Cmd(X_TIMx, DISABLE);
@@ -222,8 +225,8 @@ void TIM2_IRQHandler(void)
                 }else if(step_count >= srd_x.decel_start){                          // 直接进入减速阶段
                     srd_x.step_arr = __ARR[step_count-1];
 					
-					printf("\r\nX_pos_ACCEL:%d\r\n", X_pos);
-					printf("DECEL_X_pos:%d\r\n", X_pos);
+//					printf("\r\nX_pos_ACCEL:%d\r\n", X_pos);
+//					printf("DECEL_X_pos:%d\r\n", X_pos);
 					
                     srd_x.run_state = DECEL;
 					
@@ -247,7 +250,8 @@ void TIM2_IRQHandler(void)
 
                 if(step_count >= srd_x.decel_start)
                 {
-					printf("RUN->DECEL:%d\r\n", step_count);
+					//printf("RUN->DECEL:%d\r\n", step_count);
+					
                     srd_x.step_arr = __ARR[STEP_S-1];
                     srd_x.run_state = DECEL;
                 }
@@ -268,10 +272,11 @@ void TIM2_IRQHandler(void)
                 {
                     srd_x.step_arr = __ARR[srd_x.total_count-step_count];
                 }else{
-					printf("total_count:%d\r\n", srd_x.total_count);
-					printf("DECEL_step_count:%d\r\n", step_count);
-					printf("X_pos_DECEL:%d\r\n", X_pos);
 					
+//					printf("total_count:%d\r\n", srd_x.total_count);
+//					printf("DECEL_step_count:%d\r\n", step_count);
+//					printf("X_pos_DECEL:%d\r\n", X_pos);
+//					
 					srd_x.run_state = STOP;
                 }
 
