@@ -37,13 +37,13 @@ void X_MoveAbs(int32_t step, uint32_t accel, uint32_t decel, uint32_t speed);
 /* 加减速算法结构体与其它变量*/
 
 typedef struct{
-      uint8_t run_state; // 运行状态
-			uint8_t dir;
-			int32_t step_delay;
-			uint32_t decel_start;
-			int32_t decel_val;//减速值
-			int32_t min_delay;
-			int32_t accel_count;                 //加速过程的脉冲数
+	uint8_t run_state; // 运行状态
+	uint8_t dir;
+	int32_t step_delay;
+	uint32_t decel_start;
+	int32_t decel_val;//减速值
+	int32_t min_delay;
+	int32_t accel_count;                 //加速过程的脉冲数
 }XspeedRampData;
 
 #define FALSE   0

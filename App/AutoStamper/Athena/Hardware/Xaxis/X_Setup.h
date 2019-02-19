@@ -3,30 +3,31 @@
 
 #include "tim_2.h"
 
-// 控制方向
+// 控制方向DIR
 #define X_DIR_CLK       RCC_APB2Periph_GPIOC
 #define X_DIR_PIN       GPIO_Pin_1
 #define X_DIR_PORT      GPIOC
 #define X_DIR_SET       GPIO_SetBits(X_DIR_PORT, X_DIR_PIN)
 #define X_DIR_RESET     GPIO_ResetBits(X_DIR_PORT, X_DIR_PIN)
 
-//使能驱动器
+//使能驱动器ENA
 #define X_ENA_CLK       RCC_APB2Periph_GPIOC
 #define X_ENA_PIN       GPIO_Pin_3
 #define X_ENA_PORT      GPIOC
 #define X_ENA_SET       GPIO_SetBits(X_ENA_PORT, X_ENA_PIN)
 #define X_ENA_RESET     GPIO_ResetBits(X_ENA_PORT, X_ENA_PIN)
 
+//定时器脉冲PUL
 #define X_TIMx				 TIM2
 #define X_TIM_SetAutoreload  TIM_SetAutoreload 
 #define X_TIM_SetCompare2    TIM_SetCompare2
+
+double exp(double x);
 
 void TIM2_CH2_Init(void);
 void DIR_ENA_Init(void);
 void X_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState);
 
-
-double exp(double x);
 void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible);
 void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible);
     
@@ -49,8 +50,6 @@ void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_ma
 #define ALPHA       ((float)((2*3.1415*100/SPR)/100))                     // 每个脉冲的弧度，步距角
 #define A_T         ((float)(ALPHA*T1_FREQ))
 
-
-extern int8_t flag;
 
 typedef struct{
 	uint8_t dir;                        	// 方向

@@ -21,6 +21,35 @@ double exp(double x)
     return x;
 }
 
+
+void TIM2_CH2_Init(void)
+{
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);        // 使能TIM2
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);       // 使能GPIOA
+
+	DIR_ENA_Init();									// 初始化DIR_ENA
+
+    TIM2_RemapConfig_Init();                        // 配置重映射
+    GPIOA_1_CH2_Init();                             // 初始化GPIOA_1
+    TIM2_NVIC_Init();                               // 初始化TIM2中断配置
+    TIM2_Init(9999, 8);                             // 初始化TIM2
+    TIM2_PWM_Init();                                // 配置TIM2的PWM模式
+    
+    TIM_OC2PreloadConfig(X_TIMx, TIM_OCPreload_Enable);             // 使能重装载
+    TIM_ClearFlag(X_TIMx, TIM_FLAG_Update);                         // 设置FLAG更新
+    TIM_ITConfig(X_TIMx, TIM_IT_Update, ENABLE);                    // 使能通用定时器中断
+
+    //TIM_SetAutoreload(TIM2, 19999);               // 设置自动重装载值
+	//TIM_SetCompare1(TIM2, 9999);               // 设置比较值
+
+	TIM_Cmd(X_TIMx, DISABLE);
+    //TIM_Cmd(X_TIMx, ENABLE);                      // 使能TIM2
+}
+
+
+/********************************************
+*    函数功能：驱动器方向、使能端口初始化
+********************************************/
 void DIR_ENA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -37,38 +66,11 @@ void DIR_ENA_Init(void)
 	X_ENA_RESET;
 }
 
-void TIM2_CH2_Init(void)
-{
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);        // 使能TIM2
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);       // 使能GPIOA
-
-    TIM2_RemapConfig_Init();                        // 配置重映射
-    
-	DIR_ENA_Init();									// 初始化DIR_ENA
-	GPIOA_1_CH2_Init();                             // 初始化GPIOA_1
-    
-	TIM2_NVIC_Init();                               // 初始化TIM2中断配置
-
-    TIM2_Init(9999, 8);                           // 初始化TIM2
-    TIM2_PWM_Init();                                // 配置TIM2的PWM模式
-    
-    TIM_OC2PreloadConfig(X_TIMx, TIM_OCPreload_Enable);             // 使能重装载
-    
-    TIM_ClearFlag(X_TIMx, TIM_FLAG_Update);                         // 设置FLAG更新
-
-    TIM_ITConfig(X_TIMx, TIM_IT_Update, ENABLE);                    // 使能通用定时器中断
-
-    //TIM_SetAutoreload(TIM2, 19999);               // 设置自动重装载值
-	//TIM_SetCompare1(TIM2, 9999);               // 设置比较值
-
-	TIM_Cmd(X_TIMx, DISABLE);
-    //TIM_Cmd(X_TIMx, ENABLE);                      // 使能TIM2
-}
 
 
-/*
-函数功能：电机使能
-*/
+/*******************************************
+*           函数功能：电机使能
+*******************************************/
 void X_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState)
 {
 	u16 Ena = 0;
@@ -120,17 +122,14 @@ void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_ma
 void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
     CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
-
-	//printf("T1_FREQ:%d\n",T1_FREQ);
   
     step = step - X_pos;         // 绝对位移
 	
-    X_ENA(TIM2, ENABLE);
+    X_ENA(X_TIMx, ENABLE);
 
     // 设置运动方向
     if(step < 0)
     {
-		printf("step<0\r\n");
         srd_x.dir = CCW;
 		X_DIR_RESET;
         
@@ -141,11 +140,7 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 		X_DIR_SET;                   // step为正，ENA为+，顺时针
     }
 
-	
 	srd_x.total_count = step;    // 记录要走的总步数
-
-//	printf("Start_step:%d\r\n", step);
-//	printf("Start_X_pos:%d\r\n", X_pos);
 
     // 当旋转角度很小时，直接以启动频率开始运行
     if(step == 1)
@@ -171,9 +166,6 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
             X_Status = 1;
         }
     }
-	
-	printf("Defeine_step_arr:%d\r\n", srd_x.step_arr);
-	
     X_TIM_SetAutoreload(X_TIMx, srd_x.step_arr);
     X_TIM_SetAutoreload(X_TIMx, (srd_x.step_arr/2));
 
@@ -194,15 +186,11 @@ void TIM2_IRQHandler(void)
     {
         switch(srd_x.run_state)
         {
-            case STOP:
-//				printf("STOP_step_arr:%d\r\n", srd_x.step_arr);
-//				printf("STOP_X_pos:%d\r\n\r\n", X_pos);
-			
+            case STOP:	
                 step_count = 0;
 
                 TIM_Cmd(X_TIMx, DISABLE);
                 X_ENA_RESET;
-			
                 X_Status = 0;
 
                 break;
@@ -224,10 +212,6 @@ void TIM2_IRQHandler(void)
 					
                 }else if(step_count >= srd_x.decel_start){                          // 直接进入减速阶段
                     srd_x.step_arr = __ARR[step_count-1];
-					
-//					printf("\r\nX_pos_ACCEL:%d\r\n", X_pos);
-//					printf("DECEL_X_pos:%d\r\n", X_pos);
-					
                     srd_x.run_state = DECEL;
 					
                 }else if(step_count >= STEP_S){    
@@ -250,8 +234,6 @@ void TIM2_IRQHandler(void)
 
                 if(step_count >= srd_x.decel_start)
                 {
-					//printf("RUN->DECEL:%d\r\n", step_count);
-					
                     srd_x.step_arr = __ARR[STEP_S-1];
                     srd_x.run_state = DECEL;
                 }
@@ -271,21 +253,12 @@ void TIM2_IRQHandler(void)
                 if(step_count < srd_x.total_count)
                 {
                     srd_x.step_arr = __ARR[srd_x.total_count-step_count];
-                }else{
-					
-//					printf("total_count:%d\r\n", srd_x.total_count);
-//					printf("DECEL_step_count:%d\r\n", step_count);
-//					printf("X_pos_DECEL:%d\r\n", X_pos);
-//					
+                }else{				
 					srd_x.run_state = STOP;
                 }
 
                 break;
-
         }
-
-		//printf("step_arr[%d]:%d\r\n", step_count, srd_x.step_arr);
-		
         X_TIM_SetAutoreload(X_TIMx, srd_x.step_arr);
         X_TIM_SetCompare2(X_TIMx, (srd_x.step_arr/2));
 
