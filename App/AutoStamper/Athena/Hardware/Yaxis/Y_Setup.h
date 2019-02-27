@@ -33,8 +33,8 @@
 #define DECEL    2
 #define RUN      3
 
-#define X_TIM_PRESCALER       8                                 // 定时器预分频
-#define T1_FREQ     (SystemCoreClock/(X_TIM_PRESCALER + 1))     // 定时器频率
+#define Y_TIM_PRESCALER       8                                 // 定时器预分频
+#define T1_FREQ     (SystemCoreClock/(Y_TIM_PRESCALER + 1))     // 定时器频率
 #define SPR         200                                         // 步进电机旋转一圈脉冲数，电机常数
 #define MICRO_STEP  4                                           // 电机驱动器细分数
 #define STEP_S		800

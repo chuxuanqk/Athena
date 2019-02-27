@@ -33,6 +33,7 @@
 ".\output\key.o"
 ".\output\tim_2.o"
 ".\output\x_setup.o"
+".\output\catch.o"
 --library_type=microlib --strict --scatter ".\Output\Athena.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

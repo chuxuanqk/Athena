@@ -6,7 +6,7 @@ void GPIOA_7_CH2_Init(void)
     GPIO_InitTypeDef GPIO_InitStructure;
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -21,7 +21,7 @@ void TIM3_PWM_Init(void)
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
 	
-	TIM_OC1Init(TIM3, &TIM_OCInitStructure);              
+	TIM_OC2Init(TIM3, &TIM_OCInitStructure);              
 }
 
 

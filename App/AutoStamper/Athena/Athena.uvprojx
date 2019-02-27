@@ -334,7 +334,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Libraries\inc;.\Libraries\src;.\Libraries;.\Hardware;.\User;.\Hardware\delay;.\Hardware\sys;.\Hardware\usart;.\Hardware\LED;.\Hardware\key;.\Hardware\TIM2;.\Hardware\TIM3;.\Hardware\TIM4;.\Hardware\Xaxis</IncludePath>
+              <IncludePath>.\Libraries\inc;.\Libraries\src;.\Libraries;.\Hardware;.\User;.\Hardware\delay;.\Hardware\sys;.\Hardware\usart;.\Hardware\LED;.\Hardware\key;.\Hardware\TIM2;.\Hardware\TIM3;.\Hardware\TIM4;.\Hardware\Xaxis;.\Hardware\Catch</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -566,6 +566,11 @@
               <FileName>X_Setup.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\Xaxis\X_Setup.c</FilePath>
+            </File>
+            <File>
+              <FileName>catch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Catch\catch.c</FilePath>
             </File>
           </Files>
         </Group>
