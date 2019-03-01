@@ -17,7 +17,11 @@ void Catch_GPIO_Init(void)
     GPIO_SetBits(GPIOC,GPIO_Pin_8);
 }
 
-
+/**********************************
+ * 
+ * 			抓手控制程序
+ * 
+ * ********************************/
 void Catch(sw SW)
 {
 	switch(SW)

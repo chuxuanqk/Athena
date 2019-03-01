@@ -26,6 +26,7 @@
 ".\output\stm32f10x_spi.o"
 ".\output\stm32f10x_wwdg.o"
 ".\output\main.o"
+".\output\plug_in.o"
 ".\output\delay.o"
 ".\output\sys.o"
 ".\output\usart.o"

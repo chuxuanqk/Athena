@@ -3,6 +3,7 @@
         "key.h": "c",
         "sys.h": "c",
         "stm32f10x_gpio.h": "c",
-        "x_setup.h": "c"
+        "x_setup.h": "c",
+        "usart.h": "c"
     }
 }

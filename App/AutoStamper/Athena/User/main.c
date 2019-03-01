@@ -6,6 +6,7 @@
 #include "tim_2.h"
 #include "X_Setup.h"
 #include "catch.h"
+#include "plug_in.h"
 
 
 int32_t set_Xstep,set_Ystep,set_accel,set_decel,set_speed;   
@@ -80,13 +81,23 @@ void Catch_Test(void)
 
 int main(void)
 {
+	int32_t ret = 0;
+	
 	delay_init();
 	NVIC_Configuration();
 	
 	uart_init(9600);
 	//LED_Init();
 	
-	Catch_Test();
+	while(1)
+	{
+		ret = Recv_Int();
+		if(ret)
+		{
+			printf("ret:%d\r\n", ret);
+			ret = 0;
+		}
+	}
 
 }
 

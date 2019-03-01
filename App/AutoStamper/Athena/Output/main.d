@@ -37,3 +37,4 @@
 .\output\main.o: .\Hardware\TIM2\tim_2.h
 .\output\main.o: .\Hardware\Xaxis\X_Setup.h
 .\output\main.o: .\Hardware\Catch\catch.h
+.\output\main.o: User\plug_in.h
