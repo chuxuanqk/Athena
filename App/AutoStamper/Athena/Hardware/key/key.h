@@ -25,4 +25,7 @@ void EXTIX_Init(void);
 
 void stop(void);
 
+extern uint32_t STEP;
+extern uint8_t FLAG;
+
 #endif

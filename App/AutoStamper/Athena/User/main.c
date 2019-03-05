@@ -15,7 +15,7 @@ int16_t Status;
 uint32_t accel = 9,decel = 9,speed = 9;
 
 
-//  X÷·≤‚ ‘ƒ£øÈ
+// X÷·≤‚ ‘ƒ£øÈ
 void Xstep_Test(void)
 {
 	TIM2_CH2_Init();
@@ -44,6 +44,22 @@ void Xstep_Test(void)
 	}
 }
 
+void Xstep_Key_Test(void)
+{
+	TIM2_CH2_Init();
+	
+	while(1)
+	{
+		if(FLAG == 1)
+		{
+			LED = !LED;
+			X_MoveAbs(STEP, 12800.0, 800.0,5.0);
+			FLAG = 0;
+		}
+	}
+}
+
+
 
 // ◊• ÷≤‚ ‘ƒ£øÈ
 void Catch_Test(void)
@@ -66,6 +82,7 @@ void Catch_Test(void)
 				case 1:
 					Catch(CLOSE);
 					break;
+					
 				case 2:
 					Catch(OFF);
 					break;
@@ -79,25 +96,17 @@ void Catch_Test(void)
 }
 
 
+
 int main(void)
 {
-	int32_t ret = 0;
-	
 	delay_init();
 	NVIC_Configuration();
 	
 	uart_init(9600);
-	//LED_Init();
+	LED_Init();
+	EXTIX_Init();
 	
-	while(1)
-	{
-		ret = Recv_Int();
-		if(ret)
-		{
-			printf("ret:%d\r\n", ret);
-			ret = 0;
-		}
-	}
+	Xstep_Key_Test();
 
 }
 

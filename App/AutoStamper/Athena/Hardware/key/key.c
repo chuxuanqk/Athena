@@ -3,6 +3,9 @@
 #include "delay.h"
 
 
+uint32_t STEP=0;
+uint8_t FLAG = 0;
+
 void KEY_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -126,8 +129,10 @@ void EXTI2_IRQHandler(void)
     if(S3 == 0)
     {
         //GPIO_SetBits(GPIOB, GPIO_Pin_7);
-		LED = !LED;
-		stop();
+		//LED = !LED;
+		STEP = 0;
+		FLAG = 1;
+		//stop();
     }
 
     EXTI_ClearITPendingBit(EXTI_Line2);
@@ -136,21 +141,13 @@ void EXTI2_IRQHandler(void)
 
 //外部中断3服务程序
 void EXTI3_IRQHandler(void)
-{
-	static int16_t count_11 = 35;
-	//delay_ms(10);
-	
+{	
+	delay_ms(10);       //消抖
 	if(S2 == 0)
 	{
-		LED = !LED;
-//		count_11 = count_11 + 5;
-//		if(count_11 > 100)
-//		{
-//			count_11 = 30;
-//		}
-		TIM_SetCompare3(TIM2, 0);
-		TIM_SetCompare4(TIM2, count_11);
-		
+		//LED = !LED;
+		STEP = STEP-(4*800);
+		FLAG = 1;
 	}
 	EXTI_ClearITPendingBit(EXTI_Line3);
 }
@@ -159,20 +156,11 @@ void EXTI3_IRQHandler(void)
 //外部中断4服务程序
 void EXTI4_IRQHandler(void)
 {
-	static int16_t count = 35;
-	
-	//delay_ms(10);
-	
+	delay_ms(10);       //消抖
 	if(S1 == 0)
 	{
-		LED = !LED;
-//		count = count + 5;
-//		if(count > 100)
-//		{
-//			count = 30;
-//		}
-		TIM_SetCompare3(TIM2, count);
-		TIM_SetCompare4(TIM2, 0);
+		STEP = STEP+(4*800);
+		FLAG = 1;
 	}
 	EXTI_ClearITPendingBit(EXTI_Line4);
 }
