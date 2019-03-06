@@ -9,10 +9,13 @@
 #include "plug_in.h"
 
 
-int32_t set_Xstep,set_Ystep,set_accel,set_decel,set_speed;   
-int32_t Xstep,Ystep ;
-int16_t Status;
-uint32_t accel = 9,decel = 9,speed = 9;
+// int32_t set_Xstep,set_Ystep,set_accel,set_decel,set_speed;   
+// int32_t Xstep,Ystep ;
+// int16_t Status;
+// uint32_t accel = 9,decel = 9,speed = 9;
+float FRE_MAX = 12800.0;
+float FRE_MIN = 800.0;
+float FLEXIBLE = 5.0;
 
 
 // X÷·≤‚ ‘ƒ£øÈ
@@ -36,7 +39,7 @@ void Xstep_Test(void)
 
 			printf("Xstep:%d\r\n", Xstep);
 
-			X_MoveAbs(Xstep, 12800.0, 800.0,5.0);
+			X_MoveAbs(Xstep, FRE_MAX, FRE_MIN, FLEXIBLE);
 			
 			USART_RX_STA=0;
 		}
