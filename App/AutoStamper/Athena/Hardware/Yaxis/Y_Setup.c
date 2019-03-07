@@ -1,15 +1,15 @@
 #include "Y_Setup.h"
+#include "usart.h"
 
-
-YspeedRampData srd_y; 
+static YspeedRampData srd_y; 
 int32_t Y_Status = 0;           // 是否在运动？ 0：停止， 1：运动
-int32_t Y_pos = 0;               // 当前位置
+static uint32_t Y_pos = 0;               // 当前位置
 
-float __FRE[STEP_S] = {0.0};
-uint16_t __ARR[STEP_S] = {0};
+static float __FRE[STEP_S] = {0.0};
+static uint16_t __ARR[STEP_S] = {0};
 
 
-double exp(double x)
+static double exp(double x)
 {
     uint16_t i = 0;
 
@@ -25,9 +25,9 @@ double exp(double x)
 void TIM3_CH2_Init(void)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);
 
-    DIR_ENA_Init();
+    Y_DIR_ENA_Init();
 
     GPIOA_7_CH2_Init();
     TIM3_NVIC_Init();
@@ -42,7 +42,7 @@ void TIM3_CH2_Init(void)
     
 }
 
-void DIR_ENA_Init(void)
+static void Y_DIR_ENA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
@@ -54,8 +54,9 @@ void DIR_ENA_Init(void)
     
     GPIO_Init(Y_DIR_PORT, &GPIO_InitStructure);
 
-	X_DIR_RESET;
-	X_ENA_RESET;
+	Y_DIR_RESET;
+	Y_ENA_RESET;
+	//Y_ENA_SET;
 }
 
 
@@ -82,7 +83,7 @@ void Y_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState)
 
 
 
-void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
+static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
 {
     int32_t i=0;
     float x = 0.0;
@@ -96,7 +97,7 @@ void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_ma
 		
 		
         __FRE[i] = D_value*y + fre_min;
-        __ARR[i] = (uint16_t)((T1_FREQ/fre[i]) -  1);
+        __ARR[i] = (uint16_t)((T3_FREQ/fre[i]) -  1);
     }
 	
     return;
@@ -114,7 +115,7 @@ void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
     CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
 
-    step = step - X_pos;         // 绝对位移
+    step = step - Y_pos;         // 绝对位移
 	
     Y_ENA(Y_TIMx, ENABLE);
 
@@ -127,7 +128,7 @@ void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 		step = -step; 
     }else{
         srd_y.dir = CW;
-		X_DIR_SET;                   // step为正，ENA为+，顺时针
+		Y_DIR_SET;                   // step为正，ENA为+，顺时针
     }
 	
 	srd_y.total_count = step;    // 记录要走的总步数
@@ -136,7 +137,7 @@ void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
     if(step == 1)
     {
         srd_y.accel_count = 1;
-        srd_y.step_arr = (int16_t)((T1_FREQ/fre_min) - 1);
+        srd_y.step_arr = (int16_t)((T3_FREQ/fre_min) - 1);
         srd_y.run_state = DECEL;
         Y_Status = 1;
     }else if(step != 0){
@@ -171,8 +172,11 @@ void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
  * ************************************/
 void TIM3_IRQHandler(void)
 {
+	
     static uint16_t step_count = 0;                 // 总移步数计数器
 
+	//printf("step_count:%d\r\n", step_count);
+	
     if(TIM_GetITStatus(Y_TIMx, TIM_IT_Update) != RESET)
     {
         switch(srd_y.run_state)

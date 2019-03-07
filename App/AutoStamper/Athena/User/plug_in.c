@@ -71,7 +71,7 @@ int32_t Recv_Int(void)
  **************************************/
 int16_t Decode(void)
 {
-    uint16_t i=0;
+    //uint16_t i=0;
 
     if(USART_RX_STA&0x8000)
     {
@@ -107,7 +107,7 @@ void Stamper_Init(void)
 
     TIM2_CH2_Init();             
     TIM3_CH2_Init();
-    TIM4_CH3_Init();
+    TIM4_CH2_Init();
     Catch_GPIO_Init();
 }
 
@@ -160,7 +160,7 @@ void Z_Catch_Move(int32_t z_step, int8_t state)
  * *********************************/
 void First_Stage(void)
 {
-    int32_t Value = 0;
+    //int32_t Value = 0;
 
     Decode();
 

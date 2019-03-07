@@ -35,6 +35,10 @@
 ".\output\tim_2.o"
 ".\output\x_setup.o"
 ".\output\catch.o"
+".\output\y_setup.o"
+".\output\z_setup.o"
+".\output\tim_3.o"
+".\output\tim_4.o"
 --library_type=microlib --strict --scatter ".\Output\Athena.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

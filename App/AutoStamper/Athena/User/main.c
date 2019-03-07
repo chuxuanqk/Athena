@@ -9,13 +9,14 @@
 #include "plug_in.h"
 
 
-// int32_t set_Xstep,set_Ystep,set_accel,set_decel,set_speed;   
-// int32_t Xstep,Ystep ;
-// int16_t Status;
-// uint32_t accel = 9,decel = 9,speed = 9;
-float FRE_MAX = 12800.0;
-float FRE_MIN = 800.0;
-float FLEXIBLE = 5.0;
+int32_t set_Xstep,set_Ystep,set_accel,set_decel,set_speed;   
+int16_t Status;
+uint32_t accel = 9,decel = 9,speed = 9;
+int32_t Xstep,Ystep ;
+
+//float FRE_MAX = 12800.0;
+//float FRE_MIN = 800.0;
+//float FLEXIBLE = 5.0;
 
 
 // X轴测试模块
@@ -63,6 +64,36 @@ void Xstep_Key_Test(void)
 }
 
 
+void Ystep_Key_Test(void)
+{
+	TIM3_CH2_Init();
+	
+	while(1)
+	{
+		if(FLAG == 1)
+		{
+			LED = !LED;
+			Y_MoveAbs(STEP, 12800.0, 800.0,5.0);
+			FLAG = 0;
+		}
+	}
+}
+
+void Zstep_Key_Test(void)
+{
+	TIM4_CH2_Init();
+	
+	while(1)
+	{
+		if(FLAG == 1)
+		{
+			LED = !LED;
+			Z_MoveAbs(STEP, 12800.0, 800.0,5.0);
+			FLAG = 0;
+		}
+	}
+}
+
 
 // 抓手测试模块
 void Catch_Test(void)
@@ -109,7 +140,8 @@ int main(void)
 	LED_Init();
 	EXTIX_Init();
 	
-	Xstep_Key_Test();
-
+	//Xstep_Key_Test();
+	//Ystep_Key_Test();
+	Zstep_Key_Test();
 }
 

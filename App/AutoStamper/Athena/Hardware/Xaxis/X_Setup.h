@@ -25,11 +25,11 @@
 double exp(double x);
 
 void TIM2_CH2_Init(void);
-void DIR_ENA_Init(void);
+static void DIR_ENA_Init(void);
 void X_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState);
 
 void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible);
-void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible);
+static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible);
     
 
 #define CW      0

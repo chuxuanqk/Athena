@@ -334,7 +334,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Libraries\inc;.\Libraries\src;.\Libraries;.\Hardware;.\User;.\Hardware\delay;.\Hardware\sys;.\Hardware\usart;.\Hardware\LED;.\Hardware\key;.\Hardware\TIM2;.\Hardware\TIM3;.\Hardware\TIM4;.\Hardware\Xaxis;.\Hardware\Catch</IncludePath>
+              <IncludePath>.\Libraries\inc;.\Libraries\src;.\Libraries;.\Hardware;.\User;.\Hardware\delay;.\Hardware\sys;.\Hardware\usart;.\Hardware\LED;.\Hardware\key;.\Hardware\TIM2;.\Hardware\TIM3;.\Hardware\TIM4;.\Hardware\Xaxis;.\Hardware\Catch;.\Hardware\Yaxis;.\Hardware\Zaxis</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -576,6 +576,26 @@
               <FileName>catch.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\Catch\catch.c</FilePath>
+            </File>
+            <File>
+              <FileName>Y_Setup.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Yaxis\Y_Setup.c</FilePath>
+            </File>
+            <File>
+              <FileName>Z_Setup.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\Zaxis\Z_Setup.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim_3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\TIM3\tim_3.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim_4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\TIM4\tim_4.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -3,13 +3,13 @@
 
 XspeedRampData srd_x; 
 int32_t X_Status = 0;           // 是否在运动？ 0：停止， 1：运动
-int32_t X_pos = 0;               // 当前位置
+uint32_t X_pos = 0;               // 当前位置
 
 
-float __FRE[STEP_S] = {0.0};
-uint16_t __ARR[STEP_S] = {0};
+static float __FRE[STEP_S] = {0.0};
+static uint16_t __ARR[STEP_S] = {0};
 
-double exp(double x)
+static double exp(double x)
 {
     uint16_t i = 0;
 
@@ -50,7 +50,7 @@ void TIM2_CH2_Init(void)
 /********************************************
 *    函数功能：驱动器方向、使能端口初始化
 ********************************************/
-void DIR_ENA_Init(void)
+static void DIR_ENA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
@@ -64,6 +64,8 @@ void DIR_ENA_Init(void)
 
 	X_DIR_RESET;
 	X_ENA_RESET;
+	//X_ENA_SET;
+	
 }
 
 
@@ -87,13 +89,13 @@ void X_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState)
 			break;
 		case 0:
 			if(MOTOx == TIM2)
-				X_ENA_SET;
+				//X_ENA_SET;
 			break;
 	}
 }
 
 
-void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
+static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
 {
     int32_t i=0;
     float x = 0.0;

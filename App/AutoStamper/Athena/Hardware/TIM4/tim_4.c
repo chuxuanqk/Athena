@@ -1,15 +1,15 @@
 #include "tim_4.h"
 
 
-void GPIOB_8_CH3_Init(void)
+void GPIOB_7_CH2_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 
@@ -21,7 +21,7 @@ void TIM4_PWM_Init(void)
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
 	
-	TIM_OC3Init(TIM4, &TIM_OCInitStructure);              
+	TIM_OC2Init(TIM4, &TIM_OCInitStructure);              
 }
 
 
@@ -49,5 +49,5 @@ void TIM4_Init(uint16_t arr, uint16_t psc)
     TIM_Structure.TIM_ClockDivision = 0;                   
     TIM_Structure.TIM_CounterMode = TIM_CounterMode_Up;   
     
-    TIM_TimeBaseInit(TIM3, &TIM_Structure);                
+    TIM_TimeBaseInit(TIM4, &TIM_Structure);                
 }

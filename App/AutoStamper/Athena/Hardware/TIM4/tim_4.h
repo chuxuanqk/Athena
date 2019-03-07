@@ -3,7 +3,7 @@
 
 #include "stm32f10x.h"
 
-void GPIOB_8_CH3_Init(void);
+void GPIOB_7_CH2_Init(void);
 
 void TIM4_PWM_Init(void);
 void TIM4_NVIC_Init(void);

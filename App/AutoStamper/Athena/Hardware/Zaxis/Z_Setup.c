@@ -1,15 +1,15 @@
 #include "Z_Setup.h"
-
+#include "usart.h"
 
 ZspeedRampData srd_z; 
 int32_t Z_Status = 0;           // 是否在运动？ 0：停止， 1：运动
-int32_t Z_pos = 0;               // 当前位置
+uint32_t Z_pos = 0;               // 当前位置
 
-float __FRE[STEP_S] = {0.0};
-uint16_t __ARR[STEP_S] = {0};
+static float __FRE[STEP_S] = {0.0};
+static uint16_t __ARR[STEP_S] = {0};
 
 
-double exp(double x)
+static double exp(double x)
 {
     uint16_t i = 0;
 
@@ -23,14 +23,14 @@ double exp(double x)
 
 
 
-void TIM4_CH3_Init(void)
+void TIM4_CH2_Init(void)
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_AFIO, ENABLE);
 
-    DIR_ENA_Init();
+    Z_DIR_ENA_Init();
 
-    GPIOB_8_CH3_Init();
+    GPIOB_7_CH2_Init();
     TIM4_NVIC_Init();
     TIM4_Init(9999, 8);
     TIM4_PWM_Init();
@@ -44,12 +44,11 @@ void TIM4_CH3_Init(void)
 }
 
 
-void DIR_ENA_Init(void)
+static void Z_DIR_ENA_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
 	RCC_APB2PeriphClockCmd(Z_DIR_CLK ,ENABLE);
-    RCC_APB2PeriphClockCmd(Z_DIR_CLK ,ENABLE);
 
     GPIO_InitStructure.GPIO_Pin = Z_DIR_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -62,6 +61,7 @@ void DIR_ENA_Init(void)
 
 	Z_DIR_RESET;
 	Z_ENA_RESET;
+	//Z_ENA_SET;
 }
 
 void Z_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState)
@@ -75,18 +75,18 @@ void Z_ENA(TIM_TypeDef* MOTOx, FunctionalState NewState)
 	switch(Ena)
 	{
 		case 1:
-			if(MOTOx == TIM2)
+			if(MOTOx == TIM4)
 				Z_ENA_RESET;
 			break;
 		case 0:
-			if(MOTOx == TIM2)
-				Y_ENA_SET;
+			if(MOTOx == TIM4)
+				Z_ENA_SET;
 			break;
 	}
 }
 
 
-void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
+static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_max, float fre_min, float flexible)
 {
     int32_t i=0;
     float x = 0.0;
@@ -100,7 +100,7 @@ void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float fre_ma
 		
 		
         __FRE[i] = D_value*y + fre_min;
-        __ARR[i] = (uint16_t)((T1_FREQ/fre[i]) -  1);
+        __ARR[i] = (uint16_t)((T4_FREQ/fre[i]) -  1);
     }
 	
     return;
@@ -117,7 +117,7 @@ void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
     CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
 
-    step = step - X_pos;         // 绝对位移
+    step = step - Z_pos;         // 绝对位移
 	
     Z_ENA(Z_TIMx, ENABLE);
 
@@ -139,7 +139,7 @@ void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
     if(step == 1)
     {
         srd_z.accel_count = 1;
-        srd_z.step_arr = (int16_t)((T1_FREQ/fre_min) - 1);
+        srd_z.step_arr = (int16_t)((T4_FREQ/fre_min) - 1);
         srd_z.run_state = DECEL;
         Z_Status = 1;
     }else if(step != 0){
@@ -150,7 +150,6 @@ void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
             srd_z.decel_start = srd_z.accel_count;
             srd_z.run_state = ACCEL;
             Z_Status = 1;
-			
         }else{
             srd_z.step_arr = __ARR[0];
             srd_z.accel_count = STEP_S;
@@ -169,13 +168,13 @@ void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 
 /***************************************
  * 
- *           TIM2中断处理函数
+ *           TIM3中断处理函数
  * 
  * ************************************/
 void TIM4_IRQHandler(void)
 {
     static uint16_t step_count = 0;                 // 总移步数计数器
-
+	
     if(TIM_GetITStatus(Z_TIMx, TIM_IT_Update) != RESET)
     {
         switch(srd_z.run_state)
@@ -185,7 +184,6 @@ void TIM4_IRQHandler(void)
 
                 TIM_Cmd(Z_TIMx, DISABLE);
                 Z_ENA_RESET;
-			
                 Z_Status = 0;
 
                 break;

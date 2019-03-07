@@ -1,7 +1,5 @@
 .\output\plug_in.o: User\plug_in.c
 .\output\plug_in.o: User\plug_in.h
-.\output\plug_in.o: .\Hardware\usart\usart.h
-.\output\plug_in.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\output\plug_in.o: .\Hardware\sys\sys.h
 .\output\plug_in.o: .\Libraries\stm32f10x.h
 .\output\plug_in.o: .\Libraries\core_cm3.h
@@ -32,3 +30,15 @@
 .\output\plug_in.o: .\Libraries\inc\stm32f10x_usart.h
 .\output\plug_in.o: .\Libraries\inc\stm32f10x_wwdg.h
 .\output\plug_in.o: .\Libraries\inc\misc.h
+.\output\plug_in.o: .\Hardware\LED\led.h
+.\output\plug_in.o: .\Hardware\key\key.h
+.\output\plug_in.o: .\Hardware\delay\delay.h
+.\output\plug_in.o: .\Hardware\usart\usart.h
+.\output\plug_in.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\output\plug_in.o: .\Hardware\Xaxis\X_Setup.h
+.\output\plug_in.o: .\Hardware\TIM2\tim_2.h
+.\output\plug_in.o: .\Hardware\Yaxis\Y_Setup.h
+.\output\plug_in.o: .\Hardware\TIM3\tim_3.h
+.\output\plug_in.o: .\Hardware\Zaxis\Z_Setup.h
+.\output\plug_in.o: .\Hardware\TIM4\tim_4.h
+.\output\plug_in.o: .\Hardware\Catch\catch.h

@@ -38,3 +38,7 @@
 .\output\main.o: .\Hardware\Xaxis\X_Setup.h
 .\output\main.o: .\Hardware\Catch\catch.h
 .\output\main.o: User\plug_in.h
+.\output\main.o: .\Hardware\Yaxis\Y_Setup.h
+.\output\main.o: .\Hardware\TIM3\tim_3.h
+.\output\main.o: .\Hardware\Zaxis\Z_Setup.h
+.\output\main.o: .\Hardware\TIM4\tim_4.h
