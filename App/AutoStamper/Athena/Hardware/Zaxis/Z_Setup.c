@@ -5,8 +5,8 @@ ZspeedRampData srd_z;
 int32_t Z_Status = 0;           // 是否在运动？ 0：停止， 1：运动
 uint32_t Z_pos = 0;               // 当前位置
 
-static float __FRE[STEP_S] = {0.0};
-static uint16_t __ARR[STEP_S] = {0};
+static float __FRE[Z_STEP_S] = {0.0};
+static uint16_t __ARR[Z_STEP_S] = {0};
 
 
 static double exp(double x)
@@ -115,7 +115,7 @@ static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float
  * ******************************************************/
 void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
-    CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
+    CalculateSModelLine(__FRE, __ARR, Z_STEP_S, fre_max, fre_min, flexible);
 
     step = step - Z_pos;         // 绝对位移
 	
@@ -143,7 +143,7 @@ void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
         srd_z.run_state = DECEL;
         Z_Status = 1;
     }else if(step != 0){
-        if(step <= (STEP_S*2))
+        if(step <= (Z_STEP_S*2))
         {
             srd_z.step_arr = __ARR[0];
             srd_z.accel_count = (int32_t)(step/2);
@@ -152,8 +152,8 @@ void Z_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
             Z_Status = 1;
         }else{
             srd_z.step_arr = __ARR[0];
-            srd_z.accel_count = STEP_S;
-            srd_z.decel_start = step - STEP_S;
+            srd_z.accel_count = Z_STEP_S;
+            srd_z.decel_start = step - Z_STEP_S;
             srd_z.run_state = ACCEL;
             Z_Status = 1;
         }
@@ -208,9 +208,9 @@ void TIM4_IRQHandler(void)
 					
                     srd_z.run_state = DECEL;
 					
-                }else if(step_count >= STEP_S){    
+                }else if(step_count >= Z_STEP_S){    
 					// 进入匀速阶段
-                    srd_z.step_arr = __ARR[STEP_S-1];
+                    srd_z.step_arr = __ARR[Z_STEP_S-1];
                     srd_z.run_state = RUN;
                 }
 				
@@ -228,7 +228,7 @@ void TIM4_IRQHandler(void)
 
                 if(step_count >= srd_z.decel_start)
                 {
-                    srd_z.step_arr = __ARR[STEP_S-1];
+                    srd_z.step_arr = __ARR[Z_STEP_S-1];
                     srd_z.run_state = DECEL;
                 }
                 break;

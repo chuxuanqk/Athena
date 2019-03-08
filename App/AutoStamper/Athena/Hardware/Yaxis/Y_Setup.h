@@ -37,7 +37,7 @@
 #define T3_FREQ     (SystemCoreClock/(Y_TIM_PRESCALER + 1))     // 定时器频率
 #define SPR         200                                         // 步进电机旋转一圈脉冲数，电机常数
 #define MICRO_STEP  4                                           // 电机驱动器细分数
-#define STEP_S		800
+#define Y_STEP_S		50
 
 
 #define ALPHA       ((float)((2*3.1415*100/SPR)/100))                     // 每个脉冲的弧度，步距角

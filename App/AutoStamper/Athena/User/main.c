@@ -50,15 +50,59 @@ void Xstep_Test(void)
 
 void Xstep_Key_Test(void)
 {
+	uint32_t X_STEP;
+	uint32_t Y_STEP;
+	uint32_t X_statu;
+	uint32_t Y_statu;
+	
+	uint32_t mul = 25;
+	
 	TIM2_CH2_Init();
+	TIM3_CH2_Init();
 	
 	while(1)
 	{
-		if(FLAG == 1)
+//		if(FLAG == 1)
+//		{
+//			LED = !LED;
+//			X_MoveAbs(STEP, 12800.0, 800.0,5.0);
+//			Y_MoveAbs(STEP, 12800.0, 800.0,5.0);
+//			FLAG = 0;
+//		}
+		
+
+		
+		if(USART_RX_STA&0x8000)
 		{
-			LED = !LED;
-			X_MoveAbs(STEP, 12800.0, 800.0,5.0);
-			FLAG = 0;
+
+			X_STEP  =  (USART_RX_BUF[0]-48)*100+(USART_RX_BUF[1]-48)*10+(USART_RX_BUF[2]-48);
+			Y_STEP  =  (USART_RX_BUF[3]-48)*100+(USART_RX_BUF[4]-48)*10+(USART_RX_BUF[5]-48);
+			X_statu =  USART_RX_BUF[6]-48;
+			Y_statu =  USART_RX_BUF[7]-48;
+			
+			X_STEP = mul*X_STEP;
+			Y_STEP = mul*Y_STEP;
+			
+			if(X_statu == 0)
+			{
+				X_STEP = -X_STEP;
+			}else{
+				X_STEP = X_STEP;
+			}
+			if(Y_statu == 0)
+			{
+				Y_STEP = -Y_STEP;
+			}else{
+				Y_STEP = Y_STEP;
+			}
+			printf("X_STEP:%d\r\n", X_STEP);
+			printf("Y_STEP:%d\r\n", Y_STEP);
+			
+			X_MoveAbs(X_STEP, 8000.0, 800.0,5.0);
+			Y_MoveAbs(Y_STEP, 8000.0, 800.0,5.0);
+				
+
+			USART_RX_STA=0;
 		}
 	}
 }
@@ -140,8 +184,8 @@ int main(void)
 	LED_Init();
 	EXTIX_Init();
 	
-	//Xstep_Key_Test();
+	Xstep_Key_Test();
 	//Ystep_Key_Test();
-	Zstep_Key_Test();
+	//Zstep_Key_Test();
 }
 

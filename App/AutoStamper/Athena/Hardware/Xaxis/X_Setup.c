@@ -6,8 +6,8 @@ int32_t X_Status = 0;           // 是否在运动？ 0：停止， 1：运动
 uint32_t X_pos = 0;               // 当前位置
 
 
-static float __FRE[STEP_S] = {0.0};
-static uint16_t __ARR[STEP_S] = {0};
+static float __FRE[X_STEP_S] = {0.0};
+static uint16_t __ARR[X_STEP_S] = {0};
 
 static double exp(double x)
 {
@@ -123,7 +123,7 @@ static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float
  * ******************************************************/
 void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
-    CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
+    CalculateSModelLine(__FRE, __ARR, X_STEP_S, fre_max, fre_min, flexible);
   
     step = step - X_pos;         // 绝对位移
 	
@@ -137,7 +137,7 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
         
 		step = -step; 
     }else{
-		printf("step>0\r\n");
+		//printf("step>0\r\n");
         srd_x.dir = CW;
 		X_DIR_SET;                   // step为正，ENA为+，顺时针
     }
@@ -152,7 +152,7 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
         srd_x.run_state = DECEL;
         X_Status = 1;
     }else if(step != 0){
-        if(step <= (STEP_S*2))
+        if(step <= (X_STEP_S*2))
         {
             srd_x.step_arr = __ARR[0];
             srd_x.accel_count = (int32_t)(step/2);
@@ -162,8 +162,8 @@ void X_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 			
         }else{
             srd_x.step_arr = __ARR[0];
-            srd_x.accel_count = STEP_S;
-            srd_x.decel_start = step - STEP_S;
+            srd_x.accel_count = X_STEP_S;
+            srd_x.decel_start = step - X_STEP_S;
             srd_x.run_state = ACCEL;
             X_Status = 1;
         }
@@ -216,9 +216,9 @@ void TIM2_IRQHandler(void)
                     srd_x.step_arr = __ARR[step_count-1];
                     srd_x.run_state = DECEL;
 					
-                }else if(step_count >= STEP_S){    
+                }else if(step_count >= X_STEP_S){    
 					// 进入匀速阶段
-                    srd_x.step_arr = __ARR[STEP_S-1];
+                    srd_x.step_arr = __ARR[X_STEP_S-1];
                     srd_x.run_state = RUN;
                 }
 				
@@ -236,7 +236,7 @@ void TIM2_IRQHandler(void)
 
                 if(step_count >= srd_x.decel_start)
                 {
-                    srd_x.step_arr = __ARR[STEP_S-1];
+                    srd_x.step_arr = __ARR[X_STEP_S-1];
                     srd_x.run_state = DECEL;
                 }
                 

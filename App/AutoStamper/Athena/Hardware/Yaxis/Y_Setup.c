@@ -5,8 +5,8 @@ static YspeedRampData srd_y;
 int32_t Y_Status = 0;           // 是否在运动？ 0：停止， 1：运动
 static uint32_t Y_pos = 0;               // 当前位置
 
-static float __FRE[STEP_S] = {0.0};
-static uint16_t __ARR[STEP_S] = {0};
+static float __FRE[Y_STEP_S] = {0.0};
+static uint16_t __ARR[Y_STEP_S] = {0};
 
 
 static double exp(double x)
@@ -113,7 +113,7 @@ static void CalculateSModelLine(float fre[], uint16_t arr[], uint16_t len, float
  * ******************************************************/
 void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 {
-    CalculateSModelLine(__FRE, __ARR, STEP_S, fre_max, fre_min, flexible);
+    CalculateSModelLine(__FRE, __ARR, Y_STEP_S, fre_max, fre_min, flexible);
 
     step = step - Y_pos;         // 绝对位移
 	
@@ -141,7 +141,7 @@ void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
         srd_y.run_state = DECEL;
         Y_Status = 1;
     }else if(step != 0){
-        if(step <= (STEP_S*2))
+        if(step <= (Y_STEP_S*2))
         {
             srd_y.step_arr = __ARR[0];
             srd_y.accel_count = (int32_t)(step/2);
@@ -151,8 +151,8 @@ void Y_MoveAbs(int32_t step, float fre_max, float fre_min, float flexible)
 			
         }else{
             srd_y.step_arr = __ARR[0];
-            srd_y.accel_count = STEP_S;
-            srd_y.decel_start = step - STEP_S;
+            srd_y.accel_count = Y_STEP_S;
+            srd_y.decel_start = step - Y_STEP_S;
             srd_y.run_state = ACCEL;
             Y_Status = 1;
         }
@@ -211,9 +211,9 @@ void TIM3_IRQHandler(void)
 					
                     srd_y.run_state = DECEL;
 					
-                }else if(step_count >= STEP_S){    
+                }else if(step_count >= Y_STEP_S){    
 					// 进入匀速阶段
-                    srd_y.step_arr = __ARR[STEP_S-1];
+                    srd_y.step_arr = __ARR[Y_STEP_S-1];
                     srd_y.run_state = RUN;
                 }
 				
@@ -231,7 +231,7 @@ void TIM3_IRQHandler(void)
 
                 if(step_count >= srd_y.decel_start)
                 {
-                    srd_y.step_arr = __ARR[STEP_S-1];
+                    srd_y.step_arr = __ARR[Y_STEP_S-1];
                     srd_y.run_state = DECEL;
                 }
                 break;
